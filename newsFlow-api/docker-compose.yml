@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: newsflow-postgres
+    environment:
+      POSTGRES_DB: newsflow
+      POSTGRES_USER: newsflow
+      POSTGRES_PASSWORD: REDACTED
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - newsflow-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: newsflow-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - newsflow-network
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  newsflow-network:
+    driver: bridge
