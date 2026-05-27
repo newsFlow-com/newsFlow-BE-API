@@ -3,38 +3,62 @@ spring:
     name: newsflow-api
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/newsflow
+    # BE-DATA PostgreSQL 컨테이너 (5433 포트) 를 공유
+    url: jdbc:postgresql://localhost:5433/newsflow
     username: newsflow
     password: REDACTED
     driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-timeout: 30000
 
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate          # BE-DATA Alembic 이 스키마 관리 → validate 고정
     show-sql: true
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
+        default_schema: public
 
   data:
     redis:
       host: localhost
       port: 6379
+      timeout: 3000ms
 
 server:
   port: 8080
 
+# ── JWT ──────────────────────────────────────────────────────────
 jwt:
-  secret: ${JWT_SECRET:newsflow-secret-key-change-in-production}
-  expiration: 86400000   # 24시간 (ms)
+  secret: ${JWT_SECRET:newsflow-dev-secret-key-minimum-32-chars}
+  # 사용자 게이트 토큰 만료: 24시간
+  user-expiration: 86400000
+  # 관리자 게이트 토큰 만료: 8시간
+  admin-expiration: 28800000
 
+# ── 외부 서비스 ───────────────────────────────────────────────────
 ai:
   server:
-    url: http://localhost:8000   # newsFlow-BE-AI FastAPI 서버
+    url: http://localhost:8000    # newsFlow-BE-AI FastAPI 서버
 
+# ── Swagger ───────────────────────────────────────────────────────
 springdoc:
   swagger-ui:
     path: /swagger-ui.html
+    groups-order: ASC
+    tags-sorter: alpha
   api-docs:
     path: /api-docs
+  default-consumes-media-type: application/json
+  default-produces-media-type: application/json
+
+# ── 로깅 ──────────────────────────────────────────────────────────
+logging:
+  level:
+    com.newsflow.api: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql: TRACE
