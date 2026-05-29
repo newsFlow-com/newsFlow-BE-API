@@ -9,7 +9,7 @@ services:
       POSTGRES_USER: newsflow
       POSTGRES_PASSWORD: REDACTED
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
