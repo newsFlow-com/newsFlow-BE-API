@@ -2,12 +2,10 @@ package com.newsflow.api.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.GenericGenerator;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-// ── ArticleCategory ───────────────────────────────────────────────
 @Entity
 @Table(name = "article_categories",
         uniqueConstraints = @UniqueConstraint(
@@ -15,11 +13,10 @@ import java.util.UUID;
                 columnNames = {"article_id", "category_id"}))
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-class ArticleCategory {
+public class ArticleCategory { // 💡 public class로 변경하여 타 패키지(DTO) 접근 허용
 
     @Id
-    @GeneratedValue(generator = "UUID")
-    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+    @GeneratedValue(strategy = GenerationType.UUID) // 💡 Deprecated된 구형 Generator 제거 및 표준 UUID 생성 적용
     @Column(columnDefinition = "uuid", updatable = false, nullable = false)
     private UUID id;
 
