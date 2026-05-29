@@ -32,6 +32,9 @@ dependencies {
     // Validation
     implementation 'org.springframework.boot:spring-boot-starter-validation'
 
+    // WebClient (카카오 OAuth HTTP 통신)
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+
     // Security + JWT
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'io.jsonwebtoken:jjwt-api:0.12.6'
