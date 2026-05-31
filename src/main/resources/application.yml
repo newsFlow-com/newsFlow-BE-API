@@ -14,6 +14,7 @@ spring:
       connection-timeout: 30000
 
   jpa:
+    open-in-view: false
     hibernate:
       ddl-auto: validate          # BE-DATA Alembic 이 스키마 관리 → validate 고정
     show-sql: true
