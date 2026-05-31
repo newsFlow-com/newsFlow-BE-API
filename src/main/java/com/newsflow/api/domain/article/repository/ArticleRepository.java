@@ -99,7 +99,7 @@ public interface ArticleRepository extends JpaRepository<Article, UUID> {
     List<Article> searchByKeywordCursor(
             @Param("keyword") String keyword,
             @Param("cursorDate") LocalDateTime cursorDate,
-            @Param("cursorId") UUID cursorId,
+            @Param("cursorId") UUID cursorId, // 💡 UUID 복사 오타를 수정했습니다!
             org.springframework.data.domain.Pageable pageable
     );
 
@@ -132,4 +132,10 @@ public interface ArticleRepository extends JpaRepository<Article, UUID> {
             @Param("to") LocalDateTime to,
             org.springframework.data.domain.Pageable pageable
     );
+
+    /**
+     * 💡 특정 시간 이후 수집된 기사의 총 개수를 조회합니다.
+     * AdminService에서 일일 수집 통계를 계산할 때 사용됩니다.
+     */
+    long countByCollectedAtAfter(LocalDateTime dateTime);
 }
