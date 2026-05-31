@@ -84,5 +84,6 @@ public class Article extends BaseEntity {
     public void restore() { this.status = "active"; }
     public void delete() { this.status = "deleted"; }
     public void incrementViewCount() { this.viewCount++; }
+    public void addViewCount(int count) { this.viewCount += count; }
     public boolean isActive() { return "active".equals(this.status); }
 }
