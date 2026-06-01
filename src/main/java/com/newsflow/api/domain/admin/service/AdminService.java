@@ -111,9 +111,8 @@ public class AdminService {
         long todayCollected = articleRepository.countByCollectedAtAfter(todayStart);
 
         // 최근 파이프라인 상태 조회
-        PipelineStat latest = pipelineStatRepository
-                .findLatest(PageRequest.of(0, 1))
-                .orElse(null);
+        List<PipelineStat> latestList = pipelineStatRepository.findLatest(PageRequest.of(0, 1));
+        PipelineStat latest = latestList.isEmpty() ? null : latestList.get(0);
 
         // 2. 외부 탑레벨 클래스로 완전히 분리된 PipelineStatus 타입으로 수정 및 빌더 호출
         PipelineStatus pipelineStatus = null;
