@@ -61,4 +61,18 @@ public class Notice extends BaseEntity {
         this.publishedAt = publishedAt;
         this.expiredAt = expiredAt;
     }
+    // ── 도메인 메서드 (Builder 아래에 추가) ──────────────────────────
+    public void update(String title, String content, Boolean isPinned,
+                       Boolean isActive, String targetGate,
+                       LocalDateTime publishedAt, LocalDateTime expiredAt) {
+        if (title != null) this.title = title;
+        if (content != null) this.content = content;
+        if (isPinned != null) this.isPinned = isPinned;
+        if (isActive != null) this.isActive = isActive;
+        if (targetGate != null) this.targetGate = targetGate;
+        if (publishedAt != null) this.publishedAt = publishedAt;
+        if (expiredAt != null) this.expiredAt = expiredAt;
+    }
+
+    public void deactivate() { this.isActive = false; }
 }
