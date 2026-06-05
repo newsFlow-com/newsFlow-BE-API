@@ -45,10 +45,13 @@ public class SecurityConfig {
                                 "/api/v1/articles/**",
                                 "/api/v1/categories/**",
                                 "/api/v1/trending/**",
-                                "/api/v1/stats/**"
+                                "/api/v1/stats/**",
+                                "/api/v1/notices/**",
+                                "/api/v1/stocks/**"
                         ).permitAll()
                         .requestMatchers(
                                 "/api/v1/auth/**",
+                                "/api/v1/share/**",
                                 "/swagger-ui.html",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
