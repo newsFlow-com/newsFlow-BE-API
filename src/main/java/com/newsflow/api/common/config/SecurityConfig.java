@@ -1,5 +1,6 @@
 package com.newsflow.api.common.config;
 
+import com.newsflow.api.common.filter.ApiRequestLogFilter;
 import com.newsflow.api.common.util.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -33,6 +34,7 @@ import java.util.UUID;
 public class SecurityConfig {
 
     private final JwtUtil jwtUtil;
+    private final ApiRequestLogFilter apiRequestLogFilter;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -67,6 +69,8 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(new JwtAuthFilter(jwtUtil),
+                        UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(apiRequestLogFilter,
                         UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
