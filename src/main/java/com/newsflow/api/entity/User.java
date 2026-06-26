@@ -16,7 +16,7 @@ import java.util.UUID;
 public class User extends BaseEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID) // 💡 Deprecated된 구형 GenericGenerator 제거 및 자카르타 표준 UUID 생성 적용
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(columnDefinition = "uuid", updatable = false, nullable = false)
     private UUID id;
 
@@ -52,16 +52,19 @@ public class User extends BaseEntity {
     private LocalDateTime lastLoginAt;
 
     // ── Relations ────────────────────────────────────────────────
-    // 💡 생성자 빌더를 사용하므로 아래 기본 필드 초기화(new ArrayList<>())가 정상적으로 수행되어 NPE를 원천 방어합니다.
+    @Builder.Default
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SocialAccount> socialAccounts = new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<RefreshToken> refreshTokens = new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Bookmark> bookmarks = new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserCategory> userCategories = new ArrayList<>();
 
