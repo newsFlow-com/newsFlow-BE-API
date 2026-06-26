@@ -94,6 +94,10 @@ public class User extends BaseEntity {
     public void delete() { this.status = "deleted"; }
     public void verifyEmail() { this.emailVerified = true; }
 
+    public void changePassword(String encodedPassword) {
+        this.passwordHash = encodedPassword;
+    }
+
     public boolean isAdmin() { return "admin".equals(this.role); }
     public boolean isActive() { return "active".equals(this.status); }
 }

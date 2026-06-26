@@ -136,6 +136,18 @@ public class AuthService {
         return issueTokens(user, gate);
     }
 
+    public void changePassword(UUID userId, ChangePasswordRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPasswordHash())) {
+            throw new BusinessException(ErrorCode.INVALID_PASSWORD);
+        }
+
+        user.changePassword(passwordEncoder.encode(request.getNewPassword()));
+        refreshTokenRepository.revokeAllByUserId(userId);
+    }
+
     public void logout(String refreshTokenStr, String gate) {
         String tokenHash = hashToken(refreshTokenStr);
         refreshTokenRepository.findByTokenHash(tokenHash)

@@ -8,7 +8,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @Tag(name = "Auth", description = "인증 API (회원가입 / 로그인 / 카카오 OAuth / 토큰 갱신)")
 @RestController
@@ -70,5 +73,16 @@ public class AuthController {
     ) {
         authService.logout(request.getRefreshToken(), gate);
         return ResponseEntity.ok(ApiResponse.ok("로그아웃 되었습니다.", null));
+    }
+
+    @Operation(summary = "비밀번호 변경",
+            description = "현재 비밀번호 확인 후 변경. 변경 시 모든 Refresh Token 폐기.")
+    @PostMapping("/password/change")
+    public ResponseEntity<ApiResponse<Void>> changePassword(
+            @AuthenticationPrincipal UUID userId,
+            @Valid @RequestBody ChangePasswordRequest request
+    ) {
+        authService.changePassword(userId, request);
+        return ResponseEntity.ok(ApiResponse.ok("비밀번호가 변경되었습니다.", null));
     }
 }
