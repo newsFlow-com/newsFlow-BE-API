@@ -1,12 +1,11 @@
 package com.newsflow.api.domain.admin.controller;
 
 import com.newsflow.api.common.dto.ApiResponse;
-import com.newsflow.api.domain.admin.dto.AdminUserResponse;
-import com.newsflow.api.domain.admin.dto.ArticleReportResponse;
-import com.newsflow.api.domain.admin.dto.DashboardSummary;
+import com.newsflow.api.domain.admin.dto.*;
 import com.newsflow.api.domain.admin.service.AdminService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -112,5 +111,32 @@ public class AdminController {
     @GetMapping("/dashboard")
     public ResponseEntity<ApiResponse<DashboardSummary>> getDashboard() {
         return ResponseEntity.ok(ApiResponse.ok(adminService.getDashboard()));
+    }
+
+    // ── 콘텐츠 품질 관리 ──────────────────────────────────────────
+
+    @Operation(summary = "품질 로그 목록",
+            description = "checkType: ai_category | duplicate | keyword | stock_link")
+    @GetMapping("/quality/logs")
+    public ResponseEntity<ApiResponse<List<ContentQualityLogResponse>>> getQualityLogs(
+            @RequestParam(required = false) String checkType,
+            @RequestParam(required = false) Boolean isCorrect,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size
+    ) {
+        return ResponseEntity.ok(
+                ApiResponse.ok(adminService.getQualityLogs(checkType, isCorrect, page, size))
+        );
+    }
+
+    @Operation(summary = "품질 로그 검토", description = "isCorrect 및 수정값(correction) 저장.")
+    @PatchMapping("/quality/logs/{logId}/review")
+    public ResponseEntity<ApiResponse<Void>> reviewQualityLog(
+            @PathVariable UUID logId,
+            @Valid @RequestBody ContentQualityReviewRequest request,
+            @AuthenticationPrincipal UUID adminId
+    ) {
+        adminService.reviewQualityLog(logId, adminId, request);
+        return ResponseEntity.ok(ApiResponse.ok("품질 로그가 검토되었습니다.", null));
     }
 }

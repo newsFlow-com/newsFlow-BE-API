@@ -2,18 +2,14 @@ package com.newsflow.api.domain.admin.service;
 
 import com.newsflow.api.common.exception.BusinessException;
 import com.newsflow.api.common.exception.ErrorCode;
-import com.newsflow.api.domain.admin.dto.AdminUserResponse;
-import com.newsflow.api.domain.admin.dto.ArticleReportResponse;
-import com.newsflow.api.domain.admin.dto.DashboardSummary;
-import com.newsflow.api.domain.admin.dto.PipelineStatus; // 1. 분리된 DTO 임포트
+import com.newsflow.api.domain.admin.dto.*;
 import com.newsflow.api.domain.admin.repository.AdminArticleReportRepository;
 import com.newsflow.api.domain.admin.repository.AdminPipelineStatRepository;
+import com.newsflow.api.domain.admin.repository.ContentQualityLogRepository;
 import com.newsflow.api.domain.article.repository.ArticleRepository;
 import com.newsflow.api.domain.user.repository.UserRepository;
-import com.newsflow.api.entity.Article;
-import com.newsflow.api.entity.ArticleReport;
-import com.newsflow.api.entity.PipelineStat;
-import com.newsflow.api.entity.User;
+import com.newsflow.api.entity.*;
+import org.springframework.data.domain.Page;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -34,6 +30,7 @@ public class AdminService {
     private final UserRepository userRepository;
     private final AdminArticleReportRepository reportRepository;
     private final AdminPipelineStatRepository pipelineStatRepository;
+    private final ContentQualityLogRepository qualityLogRepository;
 
     // ── 기사 관리 ─────────────────────────────────────────────────
 
@@ -135,6 +132,22 @@ public class AdminService {
                 .pendingReports(pendingReports)
                 .latestPipeline(pipelineStatus)
                 .build();
+    }
+
+    // ── 콘텐츠 품질 관리 ──────────────────────────────────────────
+
+    public List<ContentQualityLogResponse> getQualityLogs(
+            String checkType, Boolean isCorrect, int page, int size) {
+        Page<ContentQualityLog> result = qualityLogRepository
+                .findByFilters(checkType, isCorrect, PageRequest.of(page, size));
+        return result.stream().map(ContentQualityLogResponse::from).toList();
+    }
+
+    @Transactional
+    public void reviewQualityLog(UUID logId, UUID adminId, ContentQualityReviewRequest request) {
+        ContentQualityLog log = qualityLogRepository.findById(logId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND));
+        log.review(adminId, request.getIsCorrect(), request.getCorrection());
     }
 
     // ── 내부 유틸 ─────────────────────────────────────────────────

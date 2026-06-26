@@ -52,4 +52,10 @@ public class ContentQualityLog {
     @Column(name = "created_at", nullable = false,
             columnDefinition = "timestamp with time zone default now()")
     private LocalDateTime createdAt;
+
+    public void review(UUID adminId, boolean correct, Map<String, Object> correctionData) {
+        this.checkedBy = adminId;
+        this.isCorrect = correct;
+        this.correction = correctionData;
+    }
 }
