@@ -98,10 +98,8 @@ public class AuthService {
                     .role("user")
                     .build();
 
-            // 💡 컴파일 에러가 나던 기존 코드를 삭제하고, 객체 생성을 먼저 수행합니다.
             userRepository.save(newUser);
 
-            // 💡 SocialAccount 엔티티를 빌드할 때 생성된 newUser를 명확하게 매핑합니다.
             SocialAccount social = SocialAccount.builder()
                     .user(newUser)
                     .provider("kakao")
@@ -109,11 +107,7 @@ public class AuthService {
                     .accessToken(kakaoAccessToken)
                     .build();
 
-            // 만약 User 내부의 socialAccounts 리스트가 필요하다면 엔티티 단에서 객체 생성 시
-            // ArrayList로 기본 초기화(new ArrayList<>())를 해두는 것이 모범 템플릿입니다.
-            if (newUser.getSocialAccounts() != null) {
-                newUser.getSocialAccounts().add(social);
-            }
+            newUser.getSocialAccounts().add(social);
 
             return newUser;
         });
