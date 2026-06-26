@@ -32,6 +32,9 @@ dependencies {
     // Validation
     implementation 'org.springframework.boot:spring-boot-starter-validation'
 
+    // Mail (이메일 인증)
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
+
     // WebClient (카카오 OAuth HTTP 통신)
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
 

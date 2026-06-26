@@ -38,6 +38,7 @@ public class AuthService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
+    private final EmailService emailService;
 
     public TokenResponse signup(SignupRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
@@ -134,6 +135,19 @@ public class AuthService {
 
         refreshToken.revoke();
         return issueTokens(user, gate);
+    }
+
+    public void sendVerificationEmail(UUID userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+        emailService.sendVerificationEmail(userId, user.getEmail());
+    }
+
+    public void verifyEmail(String token) {
+        UUID userId = emailService.verifyToken(token);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+        user.verifyEmail();
     }
 
     public void changePassword(UUID userId, ChangePasswordRequest request) {

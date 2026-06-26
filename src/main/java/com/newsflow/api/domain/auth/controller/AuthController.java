@@ -85,4 +85,22 @@ public class AuthController {
         authService.changePassword(userId, request);
         return ResponseEntity.ok(ApiResponse.ok("비밀번호가 변경되었습니다.", null));
     }
+
+    @Operation(summary = "이메일 인증 메일 발송", description = "로그인된 사용자에게 인증 메일 발송.")
+    @PostMapping("/email/send")
+    public ResponseEntity<ApiResponse<Void>> sendVerificationEmail(
+            @AuthenticationPrincipal UUID userId
+    ) {
+        authService.sendVerificationEmail(userId);
+        return ResponseEntity.ok(ApiResponse.ok("인증 메일이 발송되었습니다.", null));
+    }
+
+    @Operation(summary = "이메일 인증 확인", description = "메일의 링크로 접근. 인증 토큰 검증 후 계정 인증 완료.")
+    @GetMapping("/email/verify")
+    public ResponseEntity<ApiResponse<Void>> verifyEmail(
+            @RequestParam String token
+    ) {
+        authService.verifyEmail(token);
+        return ResponseEntity.ok(ApiResponse.ok("이메일 인증이 완료되었습니다.", null));
+    }
 }
