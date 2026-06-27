@@ -6,11 +6,15 @@ import com.newsflow.api.common.exception.ErrorCode;
 import com.newsflow.api.domain.article.dto.ArticleDetailResponse;
 import com.newsflow.api.domain.article.dto.ArticleResponse;
 import com.newsflow.api.domain.article.repository.ArticleRepository;
+import com.newsflow.api.domain.article.repository.ArticleViewRepository;
 import com.newsflow.api.entity.Article;
+import com.newsflow.api.entity.ArticleView;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,6 +35,7 @@ public class ArticleService {
             DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
 
     private final ArticleRepository articleRepository;
+    private final ArticleViewRepository articleViewRepository;
     private final RedisTemplate<String, String> redisTemplate;
 
     public CursorPageResponse<ArticleResponse> getArticles(
@@ -81,8 +86,29 @@ public class ArticleService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.ARTICLE_NOT_FOUND));
 
         incrementViewCount(articleId);
+        recordArticleView(articleId);
 
         return ArticleDetailResponse.from(article);
+    }
+
+    private void recordArticleView(UUID articleId) {
+        try {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            if (auth == null || !(auth.getPrincipal() instanceof UUID userId)) return;
+
+            articleViewRepository.findByUserIdAndArticleId(userId, articleId)
+                    .ifPresentOrElse(
+                            view -> view.updateViewedAt(),
+                            () -> articleViewRepository.save(
+                                    ArticleView.builder()
+                                            .userId(userId)
+                                            .articleId(articleId)
+                                            .build()
+                            )
+                    );
+        } catch (Exception e) {
+            log.warn("열람 이력 기록 실패: articleId={}", articleId);
+        }
     }
 
     private void incrementViewCount(UUID articleId) {
