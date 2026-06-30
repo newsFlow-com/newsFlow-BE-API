@@ -24,6 +24,8 @@ public class ArticleDetailResponse {
     private String author;
     private String languageCode;
     private String status;
+    private String sentiment;
+    private Double sentimentScore;
     private LocalDateTime publishedAt;
     private LocalDateTime collectedAt;
     private int viewCount;
@@ -67,6 +69,8 @@ public class ArticleDetailResponse {
                 .author(article.getAuthor())
                 .languageCode(article.getLanguageCode())
                 .status(article.getStatus())
+                .sentiment(article.getSentiment())
+                .sentimentScore(article.getSentimentScore())
                 .publishedAt(article.getPublishedAt())
                 .collectedAt(article.getCollectedAt())
                 .viewCount(article.getViewCount())

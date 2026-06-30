@@ -25,6 +25,7 @@ public class ArticleResponse {
     private LocalDateTime collectedAt;
     private int viewCount;
 
+    private String sentiment;
     private String sourceName;
     private String sourceDomain;
 
@@ -56,6 +57,7 @@ public class ArticleResponse {
                 .publishedAt(article.getPublishedAt())
                 .collectedAt(article.getCollectedAt())
                 .viewCount(article.getViewCount())
+                .sentiment(article.getSentiment())
                 .sourceName(article.getSource() != null ? article.getSource().getName() : null)
                 .sourceDomain(article.getSource() != null ? article.getSource().getDomain() : null)
                 .categories(categories)
