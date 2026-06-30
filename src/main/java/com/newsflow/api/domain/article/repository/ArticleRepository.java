@@ -118,6 +118,82 @@ public interface ArticleRepository extends JpaRepository<Article, UUID> {
     );
 
     /**
+     * 감성 필터 첫 페이지.
+     */
+    @Query("""
+            SELECT a FROM Article a
+            WHERE a.status = 'active'
+              AND a.sentiment = :sentiment
+            ORDER BY a.publishedAt DESC, a.id DESC
+            """)
+    List<Article> findBySentimentFirst(
+            @Param("sentiment") String sentiment,
+            org.springframework.data.domain.Pageable pageable
+    );
+
+    /**
+     * 감성 필터 + 커서 페이지네이션.
+     */
+    @Query("""
+            SELECT a FROM Article a
+            WHERE a.status = 'active'
+              AND a.sentiment = :sentiment
+              AND (
+                a.publishedAt < :cursorDate
+                OR (a.publishedAt = :cursorDate AND a.id < :cursorId)
+              )
+            ORDER BY a.publishedAt DESC, a.id DESC
+            """)
+    List<Article> findBySentimentCursor(
+            @Param("sentiment") String sentiment,
+            @Param("cursorDate") LocalDateTime cursorDate,
+            @Param("cursorId") UUID cursorId,
+            org.springframework.data.domain.Pageable pageable
+    );
+
+    /**
+     * 카테고리 + 감성 필터 첫 페이지.
+     */
+    @Query("""
+            SELECT DISTINCT a FROM Article a
+            JOIN a.articleCategories ac
+            JOIN ac.category c
+            WHERE a.status = 'active'
+              AND c.slug = :categorySlug
+              AND a.sentiment = :sentiment
+            ORDER BY a.publishedAt DESC, a.id DESC
+            """)
+    List<Article> findByCategoryAndSentimentFirst(
+            @Param("categorySlug") String categorySlug,
+            @Param("sentiment") String sentiment,
+            org.springframework.data.domain.Pageable pageable
+    );
+
+    /**
+     * 카테고리 + 감성 필터 + 커서 페이지네이션.
+     */
+    @Query("""
+            SELECT DISTINCT a FROM Article a
+            JOIN a.articleCategories ac
+            JOIN ac.category c
+            WHERE a.status = 'active'
+              AND c.slug = :categorySlug
+              AND a.sentiment = :sentiment
+              AND (
+                a.publishedAt < :cursorDate
+                OR (a.publishedAt = :cursorDate AND a.id < :cursorId)
+              )
+            ORDER BY a.publishedAt DESC, a.id DESC
+            """)
+    List<Article> findByCategoryAndSentimentCursor(
+            @Param("categorySlug") String categorySlug,
+            @Param("sentiment") String sentiment,
+            @Param("cursorDate") LocalDateTime cursorDate,
+            @Param("cursorId") UUID cursorId,
+            org.springframework.data.domain.Pageable pageable
+    );
+
+    /**
      * 특정 날짜 범위의 기사 조회 (달력 뷰용).
      */
     @Query("""
