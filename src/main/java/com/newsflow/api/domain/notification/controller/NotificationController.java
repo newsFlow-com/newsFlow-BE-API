@@ -3,7 +3,6 @@ package com.newsflow.api.domain.notification.controller;
 import com.newsflow.api.common.dto.ApiResponse;
 import com.newsflow.api.domain.notification.dto.NotificationResponse;
 import com.newsflow.api.domain.notification.service.NotificationService;
-import com.newsflow.api.domain.notification.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
