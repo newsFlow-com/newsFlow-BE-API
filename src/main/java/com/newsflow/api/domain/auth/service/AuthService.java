@@ -53,6 +53,12 @@ public class AuthService {
                 .build();
         userRepository.save(user);
 
+        try {
+            emailService.sendVerificationEmail(user.getId(), user.getEmail());
+        } catch (Exception e) {
+            log.warn("회원가입 이메일 인증 발송 실패: userId={}", user.getId());
+        }
+
         return issueTokens(user, "user");
     }
 
