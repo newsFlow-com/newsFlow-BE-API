@@ -114,6 +114,7 @@ public class ArticleService {
     private void incrementViewCount(UUID articleId) {
         try {
             redisTemplate.opsForValue().increment(VIEW_COUNT_KEY + articleId);
+            redisTemplate.opsForZSet().incrementScore("trending:articles", articleId.toString(), 1.0);
         } catch (Exception e) {
             log.warn("Redis 조회수 증가 실패: articleId={}", articleId);
         }
