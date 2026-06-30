@@ -45,6 +45,7 @@ public class ArticleService {
     public CursorPageResponse<ArticleResponse> getArticles(
             String categorySlug,
             String keyword,
+            String sentiment,
             String cursor,
             int size) {
 
@@ -52,23 +53,36 @@ public class ArticleService {
         var pageable = PageRequest.of(0, size + 1);
 
         List<Article> articles;
+        boolean hasCategory = categorySlug != null && !categorySlug.isBlank();
+        boolean hasKeyword = keyword != null && !keyword.isBlank();
+        boolean hasSentiment = sentiment != null && !sentiment.isBlank();
 
         if (cursor == null) {
-            if (keyword != null && !keyword.isBlank()) {
+            if (hasKeyword) {
                 articles = articleRepository.searchByKeywordFirst(keyword.trim(), pageable);
-            } else if (categorySlug != null && !categorySlug.isBlank()) {
+            } else if (hasCategory && hasSentiment) {
+                articles = articleRepository.findByCategoryAndSentimentFirst(categorySlug, sentiment, pageable);
+            } else if (hasCategory) {
                 articles = articleRepository.findByCategorySlugFirst(categorySlug, pageable);
+            } else if (hasSentiment) {
+                articles = articleRepository.findBySentimentFirst(sentiment, pageable);
             } else {
                 articles = articleRepository.findByStatusActiveFirst(pageable);
             }
         } else {
             CursorValue cv = parseCursor(cursor);
-            if (keyword != null && !keyword.isBlank()) {
+            if (hasKeyword) {
                 articles = articleRepository.searchByKeywordCursor(
                         keyword.trim(), cv.publishedAt, cv.id, pageable);
-            } else if (categorySlug != null && !categorySlug.isBlank()) {
+            } else if (hasCategory && hasSentiment) {
+                articles = articleRepository.findByCategoryAndSentimentCursor(
+                        categorySlug, sentiment, cv.publishedAt, cv.id, pageable);
+            } else if (hasCategory) {
                 articles = articleRepository.findByCategorySlugCursor(
                         categorySlug, cv.publishedAt, cv.id, pageable);
+            } else if (hasSentiment) {
+                articles = articleRepository.findBySentimentCursor(
+                        sentiment, cv.publishedAt, cv.id, pageable);
             } else {
                 articles = articleRepository.findByStatusActiveCursor(
                         cv.publishedAt, cv.id, pageable);

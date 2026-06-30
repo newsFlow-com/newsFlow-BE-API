@@ -34,6 +34,9 @@ public class ArticleController {
             @Parameter(description = "검색 키워드")
             @RequestParam(required = false) String keyword,
 
+            @Parameter(description = "감성 필터 (positive | negative | neutral)")
+            @RequestParam(required = false) String sentiment,
+
             @Parameter(description = "커서 (이전 응답의 nextCursor 값)")
             @RequestParam(required = false) String cursor,
 
@@ -41,7 +44,7 @@ public class ArticleController {
             @RequestParam(defaultValue = "20") int size
     ) {
         return ResponseEntity.ok(
-                ApiResponse.ok(articleService.getArticles(category, keyword, cursor, size))
+                ApiResponse.ok(articleService.getArticles(category, keyword, sentiment, cursor, size))
         );
     }
 
