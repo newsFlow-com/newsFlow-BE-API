@@ -2,6 +2,7 @@ package com.newsflow.api.domain.banner.controller;
 
 import com.newsflow.api.common.config.SecurityConfig;
 import com.newsflow.api.common.util.JwtUtil;
+import com.newsflow.api.domain.admin.repository.ApiKeyRepository;
 import com.newsflow.api.domain.banner.dto.BannerResponse;
 import com.newsflow.api.domain.banner.service.BannerService;
 import com.newsflow.api.domain.log.repository.ApiRequestLogRepository;
@@ -32,6 +33,7 @@ class BannerPermitAllTest {
     @MockBean BannerService bannerService;
     @MockBean JwtUtil jwtUtil;
     @MockBean ApiRequestLogRepository apiRequestLogRepository;
+    @MockBean ApiKeyRepository apiKeyRepository;
 
     @Test
     @DisplayName("GET /api/v1/banners — 인증 없이 접근해도 200 반환 (401 아님)")
