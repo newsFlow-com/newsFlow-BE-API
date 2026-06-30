@@ -14,6 +14,7 @@ public class SwaggerConfig {
     @Bean
     public OpenAPI openAPI() {
         String jwtScheme = "bearerAuth";
+        String apiKeyScheme = "X-API-Key";
 
         return new OpenAPI()
                 .info(new Info()
@@ -26,6 +27,11 @@ public class SwaggerConfig {
                                 .name(jwtScheme)
                                 .type(SecurityScheme.Type.HTTP)
                                 .scheme("bearer")
-                                .bearerFormat("JWT")));
+                                .bearerFormat("JWT"))
+                        .addSecuritySchemes(apiKeyScheme, new SecurityScheme()
+                                .name("X-API-Key")
+                                .type(SecurityScheme.Type.APIKEY)
+                                .in(SecurityScheme.In.HEADER)
+                                .description("B2B API 전용 키. /api/admin/v1/api-keys 에서 발급")));
     }
 }
