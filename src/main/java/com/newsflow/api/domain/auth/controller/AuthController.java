@@ -103,4 +103,24 @@ public class AuthController {
         authService.verifyEmail(token);
         return ResponseEntity.ok(ApiResponse.ok("이메일 인증이 완료되었습니다.", null));
     }
+
+    @Operation(summary = "비밀번호 재설정 메일 발송",
+            description = "입력한 이메일로 재설정 링크를 발송합니다. 이메일 존재 여부와 무관하게 성공 응답을 반환합니다.")
+    @PostMapping("/password/reset/request")
+    public ResponseEntity<ApiResponse<Void>> requestPasswordReset(
+            @Valid @RequestBody PasswordResetRequest request
+    ) {
+        authService.requestPasswordReset(request.getEmail());
+        return ResponseEntity.ok(ApiResponse.ok("비밀번호 재설정 메일이 발송되었습니다.", null));
+    }
+
+    @Operation(summary = "비밀번호 재설정 확인",
+            description = "재설정 토큰 검증 후 비밀번호를 변경합니다. 토큰 유효시간은 30분입니다.")
+    @PostMapping("/password/reset/confirm")
+    public ResponseEntity<ApiResponse<Void>> confirmPasswordReset(
+            @Valid @RequestBody PasswordResetConfirmRequest request
+    ) {
+        authService.confirmPasswordReset(request);
+        return ResponseEntity.ok(ApiResponse.ok("비밀번호가 재설정되었습니다.", null));
+    }
 }
