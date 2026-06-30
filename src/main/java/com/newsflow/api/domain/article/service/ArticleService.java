@@ -1,5 +1,6 @@
 package com.newsflow.api.domain.article.service;
 
+import com.newsflow.api.common.client.AiServerClient;
 import com.newsflow.api.common.dto.CursorPageResponse;
 import com.newsflow.api.common.exception.BusinessException;
 import com.newsflow.api.common.exception.ErrorCode;
@@ -21,7 +22,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -37,6 +40,7 @@ public class ArticleService {
     private final ArticleRepository articleRepository;
     private final ArticleViewRepository articleViewRepository;
     private final RedisTemplate<String, String> redisTemplate;
+    private final AiServerClient aiServerClient;
 
     public CursorPageResponse<ArticleResponse> getArticles(
             String categorySlug,
@@ -137,6 +141,28 @@ public class ArticleService {
         } catch (Exception e) {
             throw new BusinessException(ErrorCode.INVALID_INPUT, "올바르지 않은 커서 형식입니다.");
         }
+    }
+
+    public List<ArticleResponse> getRecommendedArticles(UUID userId, int size) {
+        size = Math.min(size, MAX_SIZE);
+
+        List<String> orderedIds = userId != null
+                ? aiServerClient.getRecommendedArticleIds(userId, size)
+                : List.of();
+
+        if (orderedIds.isEmpty()) {
+            return articleRepository.findByStatusActiveFirst(PageRequest.of(0, size))
+                    .stream().map(ArticleResponse::from).toList();
+        }
+
+        List<UUID> uuids = orderedIds.stream().map(UUID::fromString).toList();
+        Map<UUID, Article> articleMap = articleRepository.findAllById(uuids)
+                .stream().collect(Collectors.toMap(Article::getId, a -> a));
+
+        return uuids.stream()
+                .filter(articleMap::containsKey)
+                .map(id -> ArticleResponse.from(articleMap.get(id)))
+                .toList();
     }
 
     private record CursorValue(LocalDateTime publishedAt, UUID id) {}

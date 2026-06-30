@@ -10,8 +10,10 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @Tag(name = "Article", description = "기사 조회 API")
@@ -51,6 +53,18 @@ public class ArticleController {
     ) {
         return ResponseEntity.ok(
                 ApiResponse.ok(articleService.getArticle(articleId))
+        );
+    }
+
+    @Operation(summary = "개인화 추천 기사",
+            description = "로그인 시 열람/키워드/카테고리 이력 기반 추천. 비로그인 시 최신 인기 기사 반환.")
+    @GetMapping("/recommended")
+    public ResponseEntity<ApiResponse<List<ArticleResponse>>> getRecommendedArticles(
+            @AuthenticationPrincipal UUID userId,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return ResponseEntity.ok(
+                ApiResponse.ok(articleService.getRecommendedArticles(userId, size))
         );
     }
 }

@@ -50,7 +50,8 @@ public class SecurityConfig {
                                 "/api/v1/stats/**",
                                 "/api/v1/notices/**",
                                 "/api/v1/stocks/**",
-                                "/api/v1/banners/**"
+                                "/api/v1/banners/**",
+                                "/api/v1/search/**"
                         ).permitAll()
                         .requestMatchers(
                                 "/api/v1/auth/**",
