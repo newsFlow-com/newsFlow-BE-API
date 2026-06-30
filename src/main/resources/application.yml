@@ -4,8 +4,8 @@ spring:
 
   datasource:
     url: jdbc:postgresql://localhost:5433/newsflow
-    username: newsflow
-    password: REDACTED
+    username: ${DB_USERNAME:newsflow}
+    password: ${DB_PASSWORD:newsflow1234}
     driver-class-name: org.postgresql.Driver
     hikari:
       maximum-pool-size: 10
