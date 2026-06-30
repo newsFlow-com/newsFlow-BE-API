@@ -56,4 +56,32 @@ public class Banner extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by")
     private User createdBy;
+
+    @Builder
+    public Banner(String title, String imageUrl, String linkUrl, String position,
+                  int displayOrder, LocalDateTime startAt, LocalDateTime endAt, User createdBy) {
+        this.title = title;
+        this.imageUrl = imageUrl;
+        this.linkUrl = linkUrl;
+        this.position = position;
+        this.displayOrder = displayOrder;
+        this.startAt = startAt;
+        this.endAt = endAt;
+        this.createdBy = createdBy;
+    }
+
+    public void update(String title, String imageUrl, String linkUrl, String position,
+                       Integer displayOrder, Boolean isActive,
+                       LocalDateTime startAt, LocalDateTime endAt) {
+        if (title != null) this.title = title;
+        if (imageUrl != null) this.imageUrl = imageUrl;
+        if (linkUrl != null) this.linkUrl = linkUrl;
+        if (position != null) this.position = position;
+        if (displayOrder != null) this.displayOrder = displayOrder;
+        if (isActive != null) this.isActive = isActive;
+        if (startAt != null) this.startAt = startAt;
+        if (endAt != null) this.endAt = endAt;
+    }
+
+    public void deactivate() { this.isActive = false; }
 }
