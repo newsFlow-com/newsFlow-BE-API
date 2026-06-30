@@ -59,6 +59,13 @@ public class Article extends BaseEntity {
     @Column(nullable = false, length = 20)
     private String status = "active";
 
+    /** positive | negative | neutral */
+    @Column(length = 20)
+    private String sentiment;
+
+    @Column(name = "sentiment_score")
+    private Double sentimentScore;
+
     @Column(name = "view_count", nullable = false)
     private int viewCount = 0;
 
