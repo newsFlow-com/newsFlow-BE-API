@@ -168,6 +168,23 @@ public class AuthService {
                 .ifPresent(RefreshToken::revoke);
     }
 
+    public void requestPasswordReset(String email) {
+        // 이메일 존재 여부를 외부에 노출하지 않기 위해 항상 성공 응답
+        userRepository.findByEmail(email).ifPresent(user -> {
+            if (user.isActive()) {
+                emailService.sendPasswordResetEmail(user.getId(), user.getEmail());
+            }
+        });
+    }
+
+    public void confirmPasswordReset(PasswordResetConfirmRequest request) {
+        UUID userId = emailService.verifyResetToken(request.getToken());
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+        user.changePassword(passwordEncoder.encode(request.getNewPassword()));
+        refreshTokenRepository.revokeAllByUserId(userId);
+    }
+
     private TokenResponse issueTokens(User user, String gate) {
         refreshTokenRepository.revokeAllByUserIdAndGate(user.getId(), gate);
 
