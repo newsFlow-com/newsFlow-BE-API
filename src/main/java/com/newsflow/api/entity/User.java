@@ -52,19 +52,15 @@ public class User extends BaseEntity {
     private LocalDateTime lastLoginAt;
 
     // ── Relations ────────────────────────────────────────────────
-    @Builder.Default
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SocialAccount> socialAccounts = new ArrayList<>();
 
-    @Builder.Default
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<RefreshToken> refreshTokens = new ArrayList<>();
 
-    @Builder.Default
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Bookmark> bookmarks = new ArrayList<>();
 
-    @Builder.Default
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserCategory> userCategories = new ArrayList<>();
 
