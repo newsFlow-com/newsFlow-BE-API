@@ -4,6 +4,7 @@ import com.newsflow.api.common.dto.ApiResponse;
 import com.newsflow.api.domain.stats.dto.CalendarMonthResponse;
 import com.newsflow.api.domain.stats.dto.DailyArticleResponse;
 import com.newsflow.api.domain.stats.dto.MonthlyReportResponse;
+import com.newsflow.api.domain.stats.dto.WeeklyReportResponse;
 import com.newsflow.api.domain.stats.dto.YearlyReportResponse;
 import com.newsflow.api.domain.stats.service.StatsService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -69,6 +70,18 @@ public class StatsController {
     ) {
         return ResponseEntity.ok(
                 ApiResponse.ok(statsService.getYearlyReport(year))
+        );
+    }
+
+    @Operation(summary = "주별 리포트",
+            description = "ISO 주차 기준 상위 트렌딩 기사 Top 10 반환. week는 1~53.")
+    @GetMapping("/report/weekly")
+    public ResponseEntity<ApiResponse<WeeklyReportResponse>> getWeeklyReport(
+            @Parameter(description = "연도 (예: 2025)") @RequestParam int year,
+            @Parameter(description = "ISO 주차 (1~53)") @RequestParam int week
+    ) {
+        return ResponseEntity.ok(
+                ApiResponse.ok(statsService.getWeeklyReport(year, week))
         );
     }
 }
