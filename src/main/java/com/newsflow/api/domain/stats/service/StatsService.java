@@ -9,8 +9,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.time.temporal.IsoFields;
 import java.util.List;
 
 @Slf4j
@@ -84,6 +86,28 @@ public class StatsService {
 
         return YearlyReportResponse.builder()
                 .year(year)
+                .topArticles(stats.stream()
+                        .map(DailyArticleResponse.DailyArticleItem::from)
+                        .toList())
+                .build();
+    }
+
+    public WeeklyReportResponse getWeeklyReport(int year, int week) {
+        LocalDate start = LocalDate.now()
+                .with(IsoFields.WEEK_BASED_YEAR, year)
+                .with(IsoFields.WEEK_OF_WEEK_BASED_YEAR, week)
+                .with(DayOfWeek.MONDAY);
+        LocalDate end = start.plusDays(6);
+
+        List<DailyArticleStat> stats = statRepository.findTopByMonthWithDetails(
+                start, end, PageRequest.of(0, REPORT_TOP_N)
+        );
+
+        return WeeklyReportResponse.builder()
+                .year(year)
+                .week(week)
+                .startDate(start)
+                .endDate(end)
                 .topArticles(stats.stream()
                         .map(DailyArticleResponse.DailyArticleItem::from)
                         .toList())
