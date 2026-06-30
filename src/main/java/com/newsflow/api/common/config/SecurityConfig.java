@@ -1,7 +1,9 @@
 package com.newsflow.api.common.config;
 
+import com.newsflow.api.common.filter.ApiKeyAuthFilter;
 import com.newsflow.api.common.filter.ApiRequestLogFilter;
 import com.newsflow.api.common.util.JwtUtil;
+import com.newsflow.api.domain.admin.repository.ApiKeyRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -35,6 +37,7 @@ public class SecurityConfig {
 
     private final JwtUtil jwtUtil;
     private final ApiRequestLogFilter apiRequestLogFilter;
+    private final ApiKeyRepository apiKeyRepository;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -67,6 +70,9 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/subscriptions/**").authenticated()
                         .requestMatchers("/api/v1/notifications/**").authenticated()
 
+                        // ── B2B API 게이트 (X-API-Key 인증) ──────────────
+                        .requestMatchers("/api/b2b/**").hasRole("B2B")
+
                         // ── 관리자 게이트 ─────────────────────────────────
                         // /api/admin/** 은 ROLE_ADMIN + gate=admin 검증
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
@@ -74,6 +80,8 @@ public class SecurityConfig {
                         // ── 나머지는 인증 필요 ────────────────────────────
                         .anyRequest().authenticated()
                 )
+                .addFilterBefore(new ApiKeyAuthFilter(apiKeyRepository),
+                        UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(new JwtAuthFilter(jwtUtil),
                         UsernamePasswordAuthenticationFilter.class)
                 .addFilterAfter(apiRequestLogFilter,
