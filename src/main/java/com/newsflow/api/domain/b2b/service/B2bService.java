@@ -100,7 +100,7 @@ public class B2bService {
 
         List<B2bKeywordStatResponse.KeywordEntry> keywords = rows.stream()
                 .map(row -> B2bKeywordStatResponse.KeywordEntry.builder()
-                        .word((String) row[0])
+                        .keyword((String) row[0])
                         .mentionCount(((Number) row[1]).longValue())
                         .avgRank(((Number) row[2]).doubleValue())
                         .bestRank(((Number) row[3]).intValue())

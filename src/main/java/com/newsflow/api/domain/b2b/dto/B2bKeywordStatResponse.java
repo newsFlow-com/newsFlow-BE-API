@@ -16,7 +16,7 @@ public class B2bKeywordStatResponse {
     @Getter
     @Builder
     public static class KeywordEntry {
-        private String word;
+        private String keyword;
         private long mentionCount;
         private double avgRank;
         private int bestRank;
