@@ -62,6 +62,10 @@ public class SecurityConfig {
                                 "/actuator/**"
                         ).permitAll()
 
+                        // ── 인증 사용자 전용 (구독·알림) ─────────────────
+                        .requestMatchers("/api/v1/subscriptions/**").authenticated()
+                        .requestMatchers("/api/v1/notifications/**").authenticated()
+
                         // ── 관리자 게이트 ─────────────────────────────────
                         // /api/admin/** 은 ROLE_ADMIN + gate=admin 검증
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")

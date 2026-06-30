@@ -81,6 +81,22 @@ public class EmailService {
         mailSender.send(message);
     }
 
+    public void sendSubscriptionNotification(String toEmail, String articleTitle,
+                                             String articleId, String subscriptionValue) {
+        String articleUrl = baseUrl + "/articles/" + articleId;
+
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(senderEmail);
+        message.setTo(toEmail);
+        message.setSubject("[NewsFlow] 새 기사 알림 — " + articleTitle);
+        message.setText(
+                "'" + subscriptionValue + "' 구독 기사가 등록되었습니다.\n\n"
+                + "제목: " + articleTitle + "\n"
+                + "링크: " + articleUrl
+        );
+        mailSender.send(message);
+    }
+
     public UUID verifyResetToken(String token) {
         String key = RESET_TOKEN_PREFIX + token;
         String userIdStr = redisTemplate.opsForValue().get(key);

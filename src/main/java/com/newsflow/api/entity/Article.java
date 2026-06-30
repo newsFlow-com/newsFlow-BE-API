@@ -43,6 +43,9 @@ public class Article extends BaseEntity {
     @Column(columnDefinition = "text")
     private String content;
 
+    @Column(name = "ai_summary", columnDefinition = "text")
+    private String aiSummary;
+
     @Column(name = "thumbnail_url", columnDefinition = "text")
     private String thumbnailUrl;
 

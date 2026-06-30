@@ -31,7 +31,14 @@ public enum ErrorCode { // 💡 public 추가
 
     // 북마크
     BOOKMARK_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 북마크된 기사입니다."),
-    BOOKMARK_NOT_FOUND(HttpStatus.NOT_FOUND, "북마크를 찾을 수 없습니다.");
+    BOOKMARK_NOT_FOUND(HttpStatus.NOT_FOUND, "북마크를 찾을 수 없습니다."),
+
+    // 구독
+    SUBSCRIPTION_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 구독 중입니다."),
+    SUBSCRIPTION_NOT_FOUND(HttpStatus.NOT_FOUND, "구독을 찾을 수 없습니다."),
+
+    // 알림
+    NOTIFICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "알림을 찾을 수 없습니다.");
 
     private final HttpStatus status;
     private final String message;

@@ -17,6 +17,7 @@ public class ArticleDetailResponse {
     private UUID id;
     private String title;
     private String summary;
+    private String aiSummary;
     private String content;
     private String thumbnailUrl;
     private String originalUrl;
@@ -59,6 +60,7 @@ public class ArticleDetailResponse {
                 .id(article.getId())
                 .title(article.getTitle())
                 .summary(article.getSummary())
+                .aiSummary(article.getAiSummary())
                 .content(article.getContent())
                 .thumbnailUrl(article.getThumbnailUrl())
                 .originalUrl(article.getOriginalUrl())
