@@ -19,6 +19,9 @@ public class EmailService {
     private static final String TOKEN_PREFIX = "email:verify:";
     private static final long TOKEN_TTL_HOURS = 24;
 
+    private static final String RESET_TOKEN_PREFIX = "password:reset:";
+    private static final long RESET_TOKEN_TTL_MINUTES = 30;
+
     private final JavaMailSender mailSender;
     private final RedisTemplate<String, String> redisTemplate;
 
@@ -50,6 +53,36 @@ public class EmailService {
 
     public UUID verifyToken(String token) {
         String key = TOKEN_PREFIX + token;
+        String userIdStr = redisTemplate.opsForValue().get(key);
+        if (userIdStr == null) {
+            throw new BusinessException(ErrorCode.INVALID_TOKEN);
+        }
+        redisTemplate.delete(key);
+        return UUID.fromString(userIdStr);
+    }
+
+    public void sendPasswordResetEmail(UUID userId, String toEmail) {
+        String token = UUID.randomUUID().toString();
+        redisTemplate.opsForValue().set(
+                RESET_TOKEN_PREFIX + token,
+                userId.toString(),
+                RESET_TOKEN_TTL_MINUTES,
+                TimeUnit.MINUTES
+        );
+
+        String resetUrl = baseUrl + "/reset-password?token=" + token;
+
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(senderEmail);
+        message.setTo(toEmail);
+        message.setSubject("[NewsFlow] 비밀번호 재설정");
+        message.setText("아래 링크를 클릭해 비밀번호를 재설정하세요.\n\n" + resetUrl
+                + "\n\n링크는 30분 후 만료됩니다.");
+        mailSender.send(message);
+    }
+
+    public UUID verifyResetToken(String token) {
+        String key = RESET_TOKEN_PREFIX + token;
         String userIdStr = redisTemplate.opsForValue().get(key);
         if (userIdStr == null) {
             throw new BusinessException(ErrorCode.INVALID_TOKEN);
