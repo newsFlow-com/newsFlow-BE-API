@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: newsflow-api-test
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+
+jwt:
+  secret: newsflow-test-secret-key-minimum-32-chars
+  user-expiration: 86400000
+  admin-expiration: 28800000
+
+app:
+  base-url: http://localhost:3000
