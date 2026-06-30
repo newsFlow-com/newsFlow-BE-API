@@ -6,15 +6,19 @@ import com.newsflow.api.domain.auth.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 import java.util.UUID;
 
 @Tag(name = "Auth", description = "인증 API (회원가입 / 로그인 / 카카오 OAuth / 토큰 갱신)")
+@Validated
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
@@ -25,7 +29,10 @@ public class AuthController {
     @Operation(summary = "이메일 중복 확인", description = "available: true → 사용 가능, false → 이미 사용 중")
     @GetMapping("/check-email")
     public ResponseEntity<ApiResponse<Map<String, Boolean>>> checkEmail(
-            @RequestParam String email
+            @RequestParam
+            @NotBlank(message = "이메일은 필수입니다.")
+            @Email(message = "올바른 이메일 형식이 아닙니다.")
+            String email
     ) {
         return ResponseEntity.ok(ApiResponse.ok(Map.of("available", authService.isEmailAvailable(email))));
     }
