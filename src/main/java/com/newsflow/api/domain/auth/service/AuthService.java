@@ -286,6 +286,7 @@ public class AuthService {
         MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
         formData.add("grant_type", "authorization_code");
         formData.add("client_id", System.getenv("KAKAO_REST_API_KEY"));
+        formData.add("redirect_uri", System.getenv().getOrDefault("KAKAO_REDIRECT_URI", "http://localhost:3000/auth/kakao/callback"));
         formData.add("code", code);
 
         return WebClient.create("https://kauth.kakao.com")
