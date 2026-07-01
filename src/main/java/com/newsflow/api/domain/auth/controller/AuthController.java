@@ -79,6 +79,17 @@ public class AuthController {
         );
     }
 
+    @Operation(summary = "네이버 로그인",
+            description = "네이버 OAuth 인가 코드로 로그인. 신규 사용자는 자동 가입.")
+    @PostMapping("/naver")
+    public ResponseEntity<ApiResponse<TokenResponse>> naverLogin(
+            @Valid @RequestBody NaverLoginRequest request
+    ) {
+        return ResponseEntity.ok(
+                ApiResponse.ok(authService.naverLogin(request.getCode(), request.getState()))
+        );
+    }
+
     @Operation(summary = "토큰 갱신",
             description = "Refresh Token 으로 새 Access Token 발급.")
     @PostMapping("/refresh")

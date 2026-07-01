@@ -137,6 +137,48 @@ public class AuthService {
         return issueTokens(user, "user");
     }
 
+    public TokenResponse naverLogin(String code, String state) {
+        Map<String, Object> tokenData = getNaverToken(code, state);
+        String naverAccessToken = (String) tokenData.get("access_token");
+
+        Map<String, Object> userInfo = getNaverUserInfo(naverAccessToken);
+        Map<String, Object> response = (Map<String, Object>) userInfo.get("response");
+
+        String naverId = (String) response.get("id");
+        String email = (String) response.getOrDefault("email", naverId + "@naver.local");
+        String nickname = (String) response.getOrDefault("nickname", "네이버유저");
+        String profileImage = (String) response.getOrDefault("profile_image", null);
+
+        User user = userRepository.findByEmail(email).orElseGet(() -> {
+            User newUser = User.builder()
+                    .email(email)
+                    .nickname(nickname)
+                    .profileImageUrl(profileImage)
+                    .role("user")
+                    .build();
+
+            userRepository.save(newUser);
+
+            SocialAccount social = SocialAccount.builder()
+                    .user(newUser)
+                    .provider("naver")
+                    .providerUid(naverId)
+                    .accessToken(naverAccessToken)
+                    .build();
+
+            newUser.getSocialAccounts().add(social);
+
+            return newUser;
+        });
+
+        if (!user.isActive()) {
+            throw new BusinessException(ErrorCode.USER_SUSPENDED);
+        }
+
+        user.updateLastLogin();
+        return issueTokens(user, "user");
+    }
+
     public TokenResponse refresh(RefreshRequest request) {
         String tokenHash = hashToken(request.getRefreshToken());
         RefreshToken refreshToken = refreshTokenRepository.findByTokenHash(tokenHash)
@@ -260,6 +302,34 @@ public class AuthService {
         return WebClient.create("https://kapi.kakao.com")
                 .get()
                 .uri("/v2/user/me")
+                .header("Authorization", "Bearer " + accessToken)
+                .retrieve()
+                .bodyToMono(Map.class)
+                .block();
+    }
+
+    private Map<String, Object> getNaverToken(String code, String state) {
+        MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
+        formData.add("grant_type", "authorization_code");
+        formData.add("client_id", System.getenv("NAVER_CLIENT_ID"));
+        formData.add("client_secret", System.getenv("NAVER_CLIENT_SECRET"));
+        formData.add("code", code);
+        formData.add("state", state);
+
+        return WebClient.create("https://nid.naver.com")
+                .post()
+                .uri("/oauth2.0/token")
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .body(BodyInserters.fromValue(formData))
+                .retrieve()
+                .bodyToMono(Map.class)
+                .block();
+    }
+
+    private Map<String, Object> getNaverUserInfo(String accessToken) {
+        return WebClient.create("https://openapi.naver.com")
+                .get()
+                .uri("/v1/nid/me")
                 .header("Authorization", "Bearer " + accessToken)
                 .retrieve()
                 .bodyToMono(Map.class)
