@@ -217,6 +217,7 @@ public class AuthService {
         }
 
         user.changePassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.saveAndFlush(user);
         refreshTokenRepository.revokeAllByUserId(userId);
     }
 
@@ -243,6 +244,7 @@ public class AuthService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
         user.changePassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.saveAndFlush(user);
         refreshTokenRepository.revokeAllByUserId(userId);
     }
 
