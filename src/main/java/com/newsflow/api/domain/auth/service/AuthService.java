@@ -227,10 +227,13 @@ public class AuthService {
     }
 
     public void requestPasswordReset(String email) {
-        // 이메일 존재 여부를 외부에 노출하지 않기 위해 항상 성공 응답
         userRepository.findByEmail(email).ifPresent(user -> {
             if (user.isActive()) {
-                emailService.sendPasswordResetEmail(user.getId(), user.getEmail());
+                try {
+                    emailService.sendPasswordResetEmail(user.getId(), user.getEmail());
+                } catch (Exception e) {
+                    log.warn("비밀번호 재설정 이메일 발송 실패: userId={}", user.getId());
+                }
             }
         });
     }

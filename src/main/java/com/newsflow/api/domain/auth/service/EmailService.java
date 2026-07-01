@@ -3,6 +3,7 @@ package com.newsflow.api.domain.auth.service;
 import com.newsflow.api.common.exception.BusinessException;
 import com.newsflow.api.common.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.mail.SimpleMailMessage;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class EmailService {
@@ -28,7 +30,7 @@ public class EmailService {
     @Value("${app.base-url}")
     private String baseUrl;
 
-    @Value("${spring.mail.username}")
+    @Value("${app.mail.from}")
     private String senderEmail;
 
     public void sendVerificationEmail(UUID userId, String toEmail) {
@@ -42,13 +44,9 @@ public class EmailService {
 
         String verifyUrl = baseUrl + "/api/v1/auth/email/verify?token=" + token;
 
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom(senderEmail);
-        message.setTo(toEmail);
-        message.setSubject("[NewsFlow] 이메일 인증");
-        message.setText("아래 링크를 클릭해 이메일 인증을 완료하세요.\n\n" + verifyUrl
+        send(toEmail, "[NewsFlow] 이메일 인증",
+                "아래 링크를 클릭해 이메일 인증을 완료하세요.\n\n" + verifyUrl
                 + "\n\n링크는 24시간 후 만료됩니다.");
-        mailSender.send(message);
     }
 
     public UUID verifyToken(String token) {
@@ -71,30 +69,18 @@ public class EmailService {
         );
 
         String resetUrl = baseUrl + "/reset-password?token=" + token;
-
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom(senderEmail);
-        message.setTo(toEmail);
-        message.setSubject("[NewsFlow] 비밀번호 재설정");
-        message.setText("아래 링크를 클릭해 비밀번호를 재설정하세요.\n\n" + resetUrl
+        send(toEmail, "[NewsFlow] 비밀번호 재설정",
+                "아래 링크를 클릭해 비밀번호를 재설정하세요.\n\n" + resetUrl
                 + "\n\n링크는 30분 후 만료됩니다.");
-        mailSender.send(message);
     }
 
     public void sendSubscriptionNotification(String toEmail, String articleTitle,
                                              String articleId, String subscriptionValue) {
         String articleUrl = baseUrl + "/articles/" + articleId;
-
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom(senderEmail);
-        message.setTo(toEmail);
-        message.setSubject("[NewsFlow] 새 기사 알림 — " + articleTitle);
-        message.setText(
+        send(toEmail, "[NewsFlow] 새 기사 알림 — " + articleTitle,
                 "'" + subscriptionValue + "' 구독 기사가 등록되었습니다.\n\n"
                 + "제목: " + articleTitle + "\n"
-                + "링크: " + articleUrl
-        );
-        mailSender.send(message);
+                + "링크: " + articleUrl);
     }
 
     public UUID verifyResetToken(String token) {
@@ -105,5 +91,20 @@ public class EmailService {
         }
         redisTemplate.delete(key);
         return UUID.fromString(userIdStr);
+    }
+
+    private void send(String to, String subject, String text) {
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom(senderEmail);
+            message.setTo(to);
+            message.setSubject(subject);
+            message.setText(text);
+            mailSender.send(message);
+            log.debug("메일 발송 완료: to={}, subject={}", to, subject);
+        } catch (Exception e) {
+            log.error("메일 발송 실패: to={}, cause={}", to, e.getMessage(), e);
+            throw e;
+        }
     }
 }
