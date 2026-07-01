@@ -45,6 +45,11 @@ public class AuthService {
         return !userRepository.existsByEmail(email);
     }
 
+    @Transactional(readOnly = true)
+    public boolean isNicknameAvailable(String nickname) {
+        return !userRepository.existsByNickname(nickname);
+    }
+
     public TokenResponse signup(SignupRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new BusinessException(ErrorCode.EMAIL_DUPLICATED);

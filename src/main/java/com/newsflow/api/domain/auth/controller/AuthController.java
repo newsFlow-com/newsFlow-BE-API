@@ -37,6 +37,16 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.ok(Map.of("available", authService.isEmailAvailable(email))));
     }
 
+    @Operation(summary = "닉네임 중복 확인", description = "available: true → 사용 가능, false → 이미 사용 중")
+    @GetMapping("/check-nickname")
+    public ResponseEntity<ApiResponse<Map<String, Boolean>>> checkNickname(
+            @RequestParam
+            @NotBlank(message = "닉네임은 필수입니다.")
+            String nickname
+    ) {
+        return ResponseEntity.ok(ApiResponse.ok(Map.of("available", authService.isNicknameAvailable(nickname))));
+    }
+
     @Operation(summary = "회원가입")
     @PostMapping("/signup")
     public ResponseEntity<ApiResponse<TokenResponse>> signup(
