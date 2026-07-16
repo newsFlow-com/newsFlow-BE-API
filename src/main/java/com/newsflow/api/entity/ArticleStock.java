@@ -37,6 +37,14 @@ public class ArticleStock {
     @Column(name = "linked_by", nullable = false, length = 20)
     private String linkedBy = "rule";
 
+    /** 발행일 기준 가장 가까운 거래일의 주가 등락률(%). 인과관계가 아닌 동조화 참고 지표. */
+    @Column(name = "price_change_publish_day")
+    private Double priceChangePublishDay;
+
+    /** 발행일 종가 → 3거래일 후 종가까지의 누적 변동률(%) */
+    @Column(name = "price_change_3d")
+    private Double priceChange3d;
+
     @Column(name = "created_at", nullable = false,
             columnDefinition = "timestamp with time zone default now()")
     private LocalDateTime createdAt;

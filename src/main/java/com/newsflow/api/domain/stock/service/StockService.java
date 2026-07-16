@@ -97,6 +97,8 @@ public class StockService {
                                         : null)
                                 .mentionScore(as.getMentionScore())
                                 .sentiment(as.getArticle().getSentiment())
+                                .priceChangePublishDay(as.getPriceChangePublishDay())
+                                .priceChange3d(as.getPriceChange3d())
                                 .build())
                         .toList();
 

@@ -30,5 +30,10 @@ public class StockChartResponse {
         private final String publishedAt;
         private final Double mentionScore;
         private final String sentiment;
+
+        /** 발행일 기준 등락률(%) — 인과관계가 아닌 발행 시점 전후 주가 동조화 참고 지표 */
+        private final Double priceChangePublishDay;
+        /** 발행일 종가 → 3거래일 후 종가까지의 누적 변동률(%) */
+        private final Double priceChange3d;
     }
 }
