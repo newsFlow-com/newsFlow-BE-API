@@ -29,5 +29,6 @@ public class StockChartResponse {
         private final String title;
         private final String publishedAt;
         private final Double mentionScore;
+        private final String sentiment;
     }
 }

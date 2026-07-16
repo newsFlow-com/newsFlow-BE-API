@@ -55,15 +55,17 @@ public class StockController {
         );
     }
 
-    @Operation(summary = "종목 차트 데이터", description = "종목의 OHLCV 가격 이력과 연관 기사를 반환합니다. FE 차트 시각화에서 사용합니다.")
+    @Operation(summary = "종목 차트 데이터", description = "종목의 OHLCV 가격 이력과 연관 기사(감성 포함)를 반환합니다. FE 차트 시각화 및 엔티티 허브 페이지에서 사용합니다.")
     @GetMapping("/{stockId}/chart")
     public ResponseEntity<ApiResponse<StockChartResponse>> getStockChart(
             @PathVariable UUID stockId,
             @Parameter(description = "조회 기간 (일, 기본 30일)")
-            @RequestParam(defaultValue = "30") int days
+            @RequestParam(defaultValue = "30") int days,
+            @Parameter(description = "관련 기사 최대 개수 (기본 20, 최대 50)")
+            @RequestParam(defaultValue = "20") int articleLimit
     ) {
         return ResponseEntity.ok(
-                ApiResponse.ok(stockService.getStockChart(stockId, days))
+                ApiResponse.ok(stockService.getStockChart(stockId, days, articleLimit))
         );
     }
 

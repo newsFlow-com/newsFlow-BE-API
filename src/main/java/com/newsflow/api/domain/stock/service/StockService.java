@@ -26,7 +26,8 @@ import java.util.UUID;
 @Transactional(readOnly = true)
 public class StockService {
 
-    private static final int DEFAULT_ARTICLE_SIZE = 5;
+    private static final int DEFAULT_ARTICLE_SIZE = 20;
+    private static final int MAX_ARTICLE_SIZE = 50;
 
     private final StockRepository stockRepository;
     private final StockPriceRepository stockPriceRepository;
@@ -67,10 +68,15 @@ public class StockService {
      * FE 차트 시각화에서 사용.
      */
     public StockChartResponse getStockChart(UUID stockId, int days) {
+        return getStockChart(stockId, days, DEFAULT_ARTICLE_SIZE);
+    }
+
+    public StockChartResponse getStockChart(UUID stockId, int days, int articleLimit) {
         Stock stock = stockRepository.findById(stockId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND));
 
         LocalDate from = LocalDate.now().minusDays(days);
+        int safeArticleLimit = Math.min(Math.max(articleLimit, 1), MAX_ARTICLE_SIZE);
 
         // 변경된 StockPriceDetailResponse 활용
         List<StockPriceDetailResponse> prices = stockPriceRepository
@@ -81,7 +87,7 @@ public class StockService {
 
         // StockChartResponse 내부 static 구조에 맞게 매핑
         List<StockChartResponse.ChartArticleItem> recentArticles =
-                articleStockRepository.findByStockId(stockId, PageRequest.of(0, DEFAULT_ARTICLE_SIZE))
+                articleStockRepository.findByStockId(stockId, PageRequest.of(0, safeArticleLimit))
                         .stream()
                         .map(as -> StockChartResponse.ChartArticleItem.builder()
                                 .articleId(as.getArticle().getId())
@@ -90,6 +96,7 @@ public class StockService {
                                         ? as.getArticle().getPublishedAt().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
                                         : null)
                                 .mentionScore(as.getMentionScore())
+                                .sentiment(as.getArticle().getSentiment())
                                 .build())
                         .toList();
 
