@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Getter
-@Builder
+@Builder(toBuilder = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class IssueResponse {
 
@@ -23,6 +23,9 @@ public class IssueResponse {
     private LocalDateTime lastPublishedAt;
     private UUID representativeArticleId;
     private String representativeThumbnailUrl;
+
+    /** 속보 속도 점수 (source_count / 최초보도 이후 경과시간). /issues/breaking 에서만 채워진다. */
+    private Double breakingScore;
 
     public static IssueResponse from(Issue issue) {
         return IssueResponse.builder()

@@ -40,6 +40,21 @@ public class IssueController {
         );
     }
 
+    @Operation(summary = "속보 이슈 조회",
+            description = "최근 N시간 내 여러 매체가 동시에 다룬 이슈를 속도 점수(source_count/경과시간) 순으로 반환. 인과관계가 아닌 보도 확산 속도 지표.")
+    @GetMapping("/breaking")
+    public ResponseEntity<ApiResponse<List<IssueResponse>>> getBreakingIssues(
+            @Parameter(description = "조회 기준 시간 (기본 3시간)")
+            @RequestParam(defaultValue = "3") int hours,
+
+            @Parameter(description = "조회 개수 (기본 10, 최대 50)")
+            @RequestParam(defaultValue = "10") int limit
+    ) {
+        return ResponseEntity.ok(
+                ApiResponse.ok(issueService.getBreakingIssues(hours, limit))
+        );
+    }
+
     @Operation(summary = "이슈 상세 조회",
             description = "이슈에 속한 매체별 기사 목록 포함")
     @GetMapping("/{issueId}")
