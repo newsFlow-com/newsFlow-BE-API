@@ -29,6 +29,9 @@ public enum ErrorCode { // 💡 public 추가
     // 기사
     ARTICLE_NOT_FOUND(HttpStatus.NOT_FOUND, "기사를 찾을 수 없습니다."),
 
+    // 이슈
+    ISSUE_NOT_FOUND(HttpStatus.NOT_FOUND, "이슈를 찾을 수 없습니다."),
+
     // 북마크
     BOOKMARK_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 북마크된 기사입니다."),
     BOOKMARK_NOT_FOUND(HttpStatus.NOT_FOUND, "북마크를 찾을 수 없습니다."),
