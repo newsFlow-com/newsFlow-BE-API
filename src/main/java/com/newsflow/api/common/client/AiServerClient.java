@@ -52,4 +52,48 @@ public class AiServerClient {
             return List.of();
         }
     }
+
+    private static final String QA_FALLBACK_ANSWER =
+            "지금은 답변을 생성할 수 없습니다. 잠시 후 다시 시도해주세요.";
+
+    public record QaResult(String answer, List<QaSourceItem> sources) {
+        public static QaResult fallback() {
+            return new QaResult(QA_FALLBACK_ANSWER, List.of());
+        }
+
+        public record QaSourceItem(String articleId, String title) {}
+    }
+
+    /**
+     * BE-AI POST /qa 호출 → RAG 기반 답변 + 출처 기사 목록 반환.
+     * BE-AI 가 응답하지 않으면 fallback 안내 메시지 반환 (graceful fallback).
+     */
+    @SuppressWarnings("unchecked")
+    public QaResult askQuestion(String question) {
+        try {
+            Map<?, ?> response = webClient.post()
+                    .uri("/qa")
+                    .bodyValue(Map.of("question", question))
+                    .retrieve()
+                    .bodyToMono(Map.class)
+                    .timeout(Duration.ofSeconds(15))
+                    .block();
+
+            if (response == null) return QaResult.fallback();
+
+            String answer = (String) response.get("answer");
+            List<Map<String, Object>> sources = (List<Map<String, Object>>) response.get("sources");
+            List<QaResult.QaSourceItem> sourceItems = sources == null
+                    ? List.of()
+                    : sources.stream()
+                        .map(s -> new QaResult.QaSourceItem(
+                                (String) s.get("article_id"), (String) s.get("title")))
+                        .toList();
+
+            return new QaResult(answer != null ? answer : QA_FALLBACK_ANSWER, sourceItems);
+        } catch (Exception e) {
+            log.warn("BE-AI QA API 호출 실패: {}", e.getMessage());
+            return QaResult.fallback();
+        }
+    }
 }
