@@ -69,6 +69,60 @@ class StockServiceTest {
     }
 
     @Test
+    @DisplayName("영향도 필드(priceChangePublishDay, priceChange3d)가 그대로 매핑된다")
+    void getStockChart_mapsImpactFields() {
+        UUID stockId = UUID.randomUUID();
+        Stock stock = mockStock(stockId);
+        when(stockRepository.findById(stockId)).thenReturn(Optional.of(stock));
+        when(stockPriceRepository.findByStockIdAndDateRange(eq(stockId), any())).thenReturn(List.of());
+
+        Article article = mock(Article.class);
+        when(article.getId()).thenReturn(UUID.randomUUID());
+        when(article.getTitle()).thenReturn("삼성전자 실적 발표");
+
+        ArticleStock articleStock = mock(ArticleStock.class);
+        when(articleStock.getArticle()).thenReturn(article);
+        when(articleStock.getPriceChangePublishDay()).thenReturn(1.5);
+        when(articleStock.getPriceChange3d()).thenReturn(10.0);
+
+        when(articleStockRepository.findByStockId(eq(stockId), any(Pageable.class)))
+                .thenReturn(List.of(articleStock));
+
+        var result = stockService.getStockChart(stockId, 30, 20);
+
+        var item = result.getRecentArticles().get(0);
+        assertThat(item.getPriceChangePublishDay()).isEqualTo(1.5);
+        assertThat(item.getPriceChange3d()).isEqualTo(10.0);
+    }
+
+    @Test
+    @DisplayName("아직 영향도 분석이 안 된 기사는 null로 반환된다")
+    void getStockChart_returnsNullWhenImpactNotAnalyzedYet() {
+        UUID stockId = UUID.randomUUID();
+        Stock stock = mockStock(stockId);
+        when(stockRepository.findById(stockId)).thenReturn(Optional.of(stock));
+        when(stockPriceRepository.findByStockIdAndDateRange(eq(stockId), any())).thenReturn(List.of());
+
+        Article article = mock(Article.class);
+        when(article.getId()).thenReturn(UUID.randomUUID());
+        when(article.getTitle()).thenReturn("삼성전자 실적 발표");
+
+        ArticleStock articleStock = mock(ArticleStock.class);
+        when(articleStock.getArticle()).thenReturn(article);
+        when(articleStock.getPriceChangePublishDay()).thenReturn(null);
+        when(articleStock.getPriceChange3d()).thenReturn(null);
+
+        when(articleStockRepository.findByStockId(eq(stockId), any(Pageable.class)))
+                .thenReturn(List.of(articleStock));
+
+        var result = stockService.getStockChart(stockId, 30, 20);
+
+        var item = result.getRecentArticles().get(0);
+        assertThat(item.getPriceChangePublishDay()).isNull();
+        assertThat(item.getPriceChange3d()).isNull();
+    }
+
+    @Test
     @DisplayName("articleLimit이 MAX(50)를 넘으면 50으로 제한된다")
     void getStockChart_capsArticleLimitAtMax() {
         UUID stockId = UUID.randomUUID();
