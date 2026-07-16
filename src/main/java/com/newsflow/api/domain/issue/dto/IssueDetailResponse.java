@@ -9,7 +9,10 @@ import lombok.Getter;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Getter
 @Builder
@@ -24,9 +27,15 @@ public class IssueDetailResponse {
     private int sourceCount;
     private LocalDateTime firstPublishedAt;
     private LocalDateTime lastPublishedAt;
+    private Map<String, Long> sentimentDistribution;
     private List<ArticleResponse> articles;
 
     public static IssueDetailResponse from(Issue issue, List<Article> articles) {
+        Map<String, Long> sentimentDistribution = articles.stream()
+                .map(Article::getSentiment)
+                .filter(s -> s != null)
+                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+
         return IssueDetailResponse.builder()
                 .id(issue.getId())
                 .title(issue.getTitle())
@@ -36,6 +45,7 @@ public class IssueDetailResponse {
                 .sourceCount(issue.getSourceCount())
                 .firstPublishedAt(issue.getFirstPublishedAt())
                 .lastPublishedAt(issue.getLastPublishedAt())
+                .sentimentDistribution(sentimentDistribution.isEmpty() ? null : sentimentDistribution)
                 .articles(articles.stream().map(ArticleResponse::from).toList())
                 .build();
     }

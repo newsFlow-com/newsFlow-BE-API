@@ -93,6 +93,38 @@ class IssueServiceTest {
     }
 
     @Test
+    @DisplayName("이슈 상세 조회 시 매체별 감성 분포가 집계된다")
+    void getIssue_aggregatesSentimentDistribution() {
+        UUID issueId = UUID.randomUUID();
+        Issue issue = mock(Issue.class);
+        when(issue.getId()).thenReturn(issueId);
+
+        Article positive1 = mock(Article.class);
+        when(positive1.getSentiment()).thenReturn("positive");
+        when(positive1.getArticleCategories()).thenReturn(List.of());
+        Article positive2 = mock(Article.class);
+        when(positive2.getSentiment()).thenReturn("positive");
+        when(positive2.getArticleCategories()).thenReturn(List.of());
+        Article negative = mock(Article.class);
+        when(negative.getSentiment()).thenReturn("negative");
+        when(negative.getArticleCategories()).thenReturn(List.of());
+        Article unanalyzed = mock(Article.class);
+        when(unanalyzed.getSentiment()).thenReturn(null);
+        when(unanalyzed.getArticleCategories()).thenReturn(List.of());
+
+        when(issueRepository.findById(issueId)).thenReturn(Optional.of(issue));
+        when(articleRepository.findByIssueIdOrderByPublishedAtDesc(issueId))
+                .thenReturn(List.of(positive1, positive2, negative, unanalyzed));
+
+        var result = issueService.getIssue(issueId);
+
+        assertThat(result.getSentimentDistribution())
+                .containsEntry("positive", 2L)
+                .containsEntry("negative", 1L)
+                .doesNotContainKey("neutral");
+    }
+
+    @Test
     @DisplayName("존재하지 않는 이슈 조회 시 BusinessException 발생")
     void getIssue_throwsWhenNotFound() {
         UUID issueId = UUID.randomUUID();
