@@ -66,6 +66,10 @@ public class Article extends BaseEntity {
     @Column(name = "sentiment_score")
     private Double sentimentScore;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "issue_id")
+    private Issue issue;
+
     @Column(name = "view_count", nullable = false)
     private int viewCount = 0;
 
