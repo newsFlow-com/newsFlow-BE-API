@@ -14,9 +14,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Pageable;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -132,5 +134,71 @@ class IssueServiceTest {
 
         assertThatThrownBy(() -> issueService.getIssue(issueId))
                 .isInstanceOf(BusinessException.class);
+    }
+
+    @Test
+    @DisplayName("속보 후보가 없으면 빈 리스트를 반환한다")
+    void getBreakingIssues_returnsEmptyWhenNoCandidates() {
+        when(issueRepository.findBreakingCandidates(any(), eq(2), any(Pageable.class)))
+                .thenReturn(List.of());
+
+        var result = issueService.getBreakingIssues(3, 10);
+
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    @DisplayName("짧은 시간에 많은 매체가 붙은 이슈일수록 속도 점수가 높아 먼저 정렬된다")
+    void getBreakingIssues_sortsByVelocityDescending() {
+        Issue slow = mock(Issue.class); // 매체 2곳 / 4시간 경과 → 점수 0.5
+        when(slow.getSourceCount()).thenReturn(2);
+        when(slow.getFirstPublishedAt()).thenReturn(LocalDateTime.now().minusHours(4));
+
+        Issue fast = mock(Issue.class); // 매체 4곳 / 1시간 경과 → 점수 4.0
+        when(fast.getSourceCount()).thenReturn(4);
+        when(fast.getFirstPublishedAt()).thenReturn(LocalDateTime.now().minusHours(1));
+
+        when(issueRepository.findBreakingCandidates(any(), eq(2), any(Pageable.class)))
+                .thenReturn(List.of(slow, fast));
+
+        var result = issueService.getBreakingIssues(3, 10);
+
+        assertThat(result).hasSize(2);
+        assertThat(result.get(0).getSourceCount()).isEqualTo(4);
+        assertThat(result.get(0).getBreakingScore()).isGreaterThan(result.get(1).getBreakingScore());
+    }
+
+    @Test
+    @DisplayName("limit이 MAX_SIZE(50)를 넘으면 50개로 제한된다")
+    void getBreakingIssues_capsLimitAtMax() {
+        List<Issue> many = IntStream.range(0, 60)
+                .mapToObj(i -> {
+                    Issue issue = mock(Issue.class);
+                    when(issue.getSourceCount()).thenReturn(2);
+                    when(issue.getFirstPublishedAt()).thenReturn(LocalDateTime.now().minusHours(1));
+                    return issue;
+                })
+                .toList();
+        when(issueRepository.findBreakingCandidates(any(), eq(2), any(Pageable.class)))
+                .thenReturn(many);
+
+        var result = issueService.getBreakingIssues(3, 100);
+
+        assertThat(result).hasSize(50);
+    }
+
+    @Test
+    @DisplayName("firstPublishedAt이 없어도 예외 없이 처리된다")
+    void getBreakingIssues_handlesNullFirstPublishedAt() {
+        Issue issue = mock(Issue.class);
+        when(issue.getSourceCount()).thenReturn(2);
+        when(issue.getFirstPublishedAt()).thenReturn(null);
+
+        when(issueRepository.findBreakingCandidates(any(), eq(2), any(Pageable.class)))
+                .thenReturn(List.of(issue));
+
+        var result = issueService.getBreakingIssues(3, 10);
+
+        assertThat(result).hasSize(1);
     }
 }
