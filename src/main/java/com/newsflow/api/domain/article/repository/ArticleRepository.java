@@ -214,4 +214,14 @@ public interface ArticleRepository extends JpaRepository<Article, UUID> {
      * AdminService에서 일일 수집 통계를 계산할 때 사용됩니다.
      */
     long countByCollectedAtAfter(LocalDateTime dateTime);
+
+    /**
+     * 이슈에 속한 활성 기사 목록 (매체 비교용, 발행일 최신순).
+     */
+    @Query("""
+            SELECT a FROM Article a
+            WHERE a.issue.id = :issueId AND a.status = 'active'
+            ORDER BY a.publishedAt DESC
+            """)
+    List<Article> findByIssueIdOrderByPublishedAtDesc(@Param("issueId") UUID issueId);
 }
