@@ -104,7 +104,7 @@ class B2bServiceTest {
                 LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 7), 20);
 
         assertThat(result.getKeywords()).hasSize(1);
-        assertThat(result.getKeywords().get(0).getWord()).isEqualTo("삼성");
+        assertThat(result.getKeywords().get(0).getKeyword()).isEqualTo("삼성");
         assertThat(result.getKeywords().get(0).getMentionCount()).isEqualTo(15L);
         assertThat(result.getKeywords().get(0).getBestRank()).isEqualTo(1);
     }
